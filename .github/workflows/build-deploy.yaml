@@ -46,6 +46,8 @@ jobs:
         echo ${CURRENT_TAG}
         cd helmcharts
         sed -i "s/tag: .*/tag: ${CURRENT_TAG}/" values.yaml
+        git config --global user.email "chandanjslc2001@gmail.com"
+        git config --global user.name "kjchandan"
         git add values.yaml
         git commit -m "Update image tag to ${CURRENT_TAG}"
         git push
