@@ -228,7 +228,6 @@ resource "azurerm_lb_rule" "alb_rule" {
   idle_timeout_in_minutes        = 4
   disable_outbound_snat          = false
 }
-
 # ------------------------------------------
 # ArgoCD Deployment
 # ------------------------------------------
@@ -275,9 +274,9 @@ resource "kubernetes_manifest" "argocd_demo_app" {
     spec = {
       project = "default"
       source = {
-        repoURL = "https://github.com/argoproj/argocd-example-apps"
+        repoURL        = "https://github.com/argoproj/argocd-example-apps"
         targetRevision = "HEAD"
-        path = "guestbook"
+        path           = "guestbook"
       }
       destination = {
         server    = "https://kubernetes.default.svc"
@@ -290,12 +289,21 @@ resource "kubernetes_manifest" "argocd_demo_app" {
   }
 }
 
-# Outputs
-output "argocd_server_external_ip" {
-  description = "External IP of ArgoCD server service"
-  value       = helm_release.argocd.status[0].name
+# Get ArgoCD Server service details
+data "kubernetes_service" "argocd_server" {
+  metadata {
+    name      = "argocd-server"
+    namespace = "argocd"
+  }
 }
 
+# Output ArgoCD external IP
+output "argocd_server_external_ip" {
+  description = "External IP of ArgoCD server service"
+  value       = data.kubernetes_service.argocd_server.status[0].load_balancer[0].ingress[0].ip
+}
+
+# Get ArgoCD initial admin password
 data "kubernetes_secret" "argocd_initial_password" {
   metadata {
     name      = "argocd-initial-admin-secret"
@@ -308,3 +316,4 @@ output "argocd_admin_password" {
   value       = base64decode(data.kubernetes_secret.argocd_initial_password.data["password"])
   sensitive   = true
 }
+ 
