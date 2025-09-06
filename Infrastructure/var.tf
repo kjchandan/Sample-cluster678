@@ -135,7 +135,3 @@ variable "enable_alb_outbound_rule" {
   default     = false
 }
 
-variable "admin_group_object_id" {
-  description = "Azure AD group object ID for AKS cluster admin"
-  type        = string
-}
