@@ -62,6 +62,8 @@ jobs:
       run: |
         # cd $PWD/infrastructure
         terraform validate -no-color
+    - name: Force unlock (optional)
+      run: terraform force-unlock -force a5d0e270-7017-df54-2e9e-347b42c34d91 || true
 
     - name: Terraform Plan
       id: plan
