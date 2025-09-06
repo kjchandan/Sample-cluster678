@@ -55,6 +55,7 @@ jobs:
 
         git add values.yaml
         git commit -m "Update image tag to ${CURRENT_TAG}" || echo "No changes to commit"
+        git push origin main
         # CURRENT_TAG=$(echo $(git rev-parse --short HEAD))
         # echo ${CURRENT_TAG}
         # cd helmcharts
