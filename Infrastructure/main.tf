@@ -228,10 +228,11 @@ resource "azurerm_lb_rule" "alb_rule" {
   idle_timeout_in_minutes        = 4
   disable_outbound_snat          = false
 }
-# ------------------------------------------
-# ArgoCD Deployment
-# ------------------------------------------
 
+
+# ------------------------------------------
+# Helm Provider (for ArgoCD)
+# ------------------------------------------
 provider "helm" {
   kubernetes {
     host                   = azurerm_kubernetes_cluster.aks.kube_config[0].host
@@ -241,20 +242,18 @@ provider "helm" {
   }
 }
 
-# Kubernetes provider (needed for kubernetes_* and data resources)
-provider "kubernetes" {
-  host                   = azurerm_kubernetes_cluster.aks.kube_config[0].host
-  client_certificate     = base64decode(azurerm_kubernetes_cluster.aks.kube_config[0].client_certificate)
-  client_key             = base64decode(azurerm_kubernetes_cluster.aks.kube_config[0].client_key)
-  cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.aks.kube_config[0].cluster_ca_certificate)
-}
-
+# ------------------------------------------
+# ArgoCD Namespace
+# ------------------------------------------
 resource "kubernetes_namespace" "argocd" {
   metadata {
     name = "argocd"
   }
 }
 
+# ------------------------------------------
+# ArgoCD Helm Release
+# ------------------------------------------
 resource "helm_release" "argocd" {
   name       = "argocd"
   repository = "https://argoproj.github.io/argo-helm"
@@ -270,58 +269,13 @@ EOF
   ]
 }
 
-# Demo Application Deployment via ArgoCD
-resource "kubernetes_manifest" "argocd_demo_app" {
-  manifest = {
-    apiVersion = "argoproj.io/v1alpha1"
-    kind       = "Application"
-    metadata = {
-      name      = "demo-nginx"
-      namespace = "argocd"
-    }
-    spec = {
-      project = "default"
-      source = {
-        repoURL        = "https://github.com/argoproj/argocd-example-apps"
-        targetRevision = "HEAD"
-        path           = "guestbook"
-      }
-      destination = {
-        server    = "https://kubernetes.default.svc"
-        namespace = "default"
-      }
-      syncPolicy = {
-        automated = {}
-      }
-    }
-  }
+# ------------------------------------------
+# Outputs
+# ------------------------------------------
+output "argocd_release_name" {
+  value = helm_release.argocd.name
 }
 
-# Get ArgoCD Server service details
-data "kubernetes_service" "argocd_server" {
-  metadata {
-    name      = "argocd-server"
-    namespace = "argocd"
-  }
+output "argocd_namespace" {
+  value = kubernetes_namespace.argocd.metadata[0].name
 }
-
-# Output ArgoCD external IP
-output "argocd_server_external_ip" {
-  description = "External IP of ArgoCD server service"
-  value       = data.kubernetes_service.argocd_server.status[0].load_balancer[0].ingress[0].ip
-}
-
-# Get ArgoCD initial admin password
-data "kubernetes_secret" "argocd_initial_password" {
-  metadata {
-    name      = "argocd-initial-admin-secret"
-    namespace = "argocd"
-  }
-}
-
-output "argocd_admin_password" {
-  description = "Initial admin password for ArgoCD"
-  value       = base64decode(data.kubernetes_secret.argocd_initial_password.data["password"])
-  sensitive   = true
-}
- 
