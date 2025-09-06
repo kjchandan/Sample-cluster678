@@ -39,6 +39,15 @@ jobs:
         cd $PWD/application/node-k8s-app
         docker build -t azpeclusteracrpe.azurecr.io/nodejs-app:${CURRENT_TAG} .
         docker push azpeclusteracrpe.azurecr.io/nodejs-app:${CURRENT_TAG}
+
+    - name: update tag
+      run: | 
+        CURRENT_TAG=$(echo $(git rev-parse --short HEAD))
+        echo ${CURRENT_TAG}
+        sed -i "s/tag: .*/tag: ${CURRENT_TAG}/" values.yaml
+        git add values.yaml
+        git commit -m "Update image tag to ${CURRENT_TAG}"
+        git push
         
     # - name: Install kubectl & kubelogin
     #   run: |
