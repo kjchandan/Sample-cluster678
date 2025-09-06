@@ -13,6 +13,7 @@ jobs:
       uses: actions/checkout@v3
       with:
         persist-credentials: true 
+        token: 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
 
     - name: Azure Login
       uses: azure/login@v1
@@ -51,10 +52,10 @@ jobs:
         
         git config --global user.email "chandanjslc2001@gmail.com"
         git config --global user.name "kjchandan"
-        git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/kjchandan/Sample-cluster678.git
+        # git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/kjchandan/Sample-cluster678.git
         git add values.yaml
         git commit -m "Update image tag to ${CURRENT_TAG}"
-        git push
+        git push origin main https://x-access-token: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@github.com/kjchandan/Sample-cluster678.git
         
     # - name: Install kubectl & kubelogin
     #   run: |
