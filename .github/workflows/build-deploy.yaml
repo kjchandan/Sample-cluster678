@@ -49,7 +49,10 @@ jobs:
         
         cd helmcharts
         sed -i "s/tag: .*/tag: ${CURRENT_TAG}/" values.yaml
-        
+
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+
         git add values.yaml
         git commit -m "Update image tag to ${CURRENT_TAG}" || echo "No changes to commit"
         # CURRENT_TAG=$(echo $(git rev-parse --short HEAD))
