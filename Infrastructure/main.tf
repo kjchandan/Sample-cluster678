@@ -84,6 +84,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
       managed                = true
       admin_group_object_ids = [var.admin_group_object_id] # <-- Cluster Admin group
     }
+  }
 }
 
 # Output kubeconfig
