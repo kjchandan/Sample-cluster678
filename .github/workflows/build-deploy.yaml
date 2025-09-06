@@ -28,6 +28,7 @@ jobs:
               "galleryEndpointUrl": "https://gallery.azure.com/",
               "managementEndpointUrl": "https://management.core.windows.net/"
             }
+            
     - name: Docker login
       run: az acr login --name azpeclusteracrpe
 
@@ -53,10 +54,10 @@ jobs:
         # kubectl get pod
         # kubectl get svc 
         # kubectl get event
-        helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
-        helm repo update
+        # helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+        # helm repo update
 
-        helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx --namespace ingress-nginx --create-namespace
+        # helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx --namespace ingress-nginx --create-namespace
         # kubectl get pods -n ingress-nginx
         # kubectl describe svc ingress-nginx-controller -n ingress-nginx
         # kubectl get events -n ingress-nginx --sort-by=.metadata.creationTimestamp
