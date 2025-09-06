@@ -274,7 +274,40 @@ server:
 EOF
   ]
 }
+data "kubernetes_service" "argocd_server" {
+  metadata {
+    name      = "argocd-server"
+    namespace = kubernetes_namespace.argocd.metadata[0].name
+  }
 
+  depends_on = [helm_release.argocd]
+}
+# Demo Application Deployment via ArgoCD
+resource "kubernetes_manifest" "argocd_demo_app" {
+  manifest = {
+    apiVersion = "argoproj.io/v1alpha1"
+    kind       = "Application"
+    metadata = {
+      name      = "node-js-app"
+      namespace = "argocd"
+    }
+    spec = {
+      project = "default"
+      source = {
+        repoURL = "https://github.com/rakshitha-mayya/sample-repository-structure"
+        targetRevision = "main"
+        path = "helmcharts"
+      }
+      destination = {
+        server    = "https://kubernetes.default.svc"
+        namespace = "default"
+      }
+      syncPolicy = {
+        automated = {}
+      }
+    }
+  }
+}
 # ------------------------------------------
 # Outputs
 # ------------------------------------------
@@ -284,4 +317,8 @@ output "argocd_release_name" {
 
 output "argocd_namespace" {
   value = kubernetes_namespace.argocd.metadata[0].name
+}
+output "argocd_server_external_ip" {
+  description = "External IP of ArgoCD LoadBalancer service"
+  value       = data.kubernetes_service.argocd_server.status[0].load_balancer[0].ingress[0].ip
 }
